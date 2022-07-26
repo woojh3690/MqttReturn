@@ -18,13 +18,10 @@ public class MQTT implements MqttCallback {
     private final MemoryPersistence persistence;
     private final MqttClient sampleClient;
 
-    public MQTT() throws Exception {
-        // Specify the domain name for connecting to IoT Platform.
-        String broker = "ssl://dev.iwaz.co.kr:8883";
-        String caFilePath = "C:/Users/user/Downloads/ca.pem";
-
+    public MQTT(String ip, String port, String caFilePath, String clientId, String topic) throws Exception {
+        final String broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
-        this.sampleClient = new MqttClient(broker, "woo_test", persistence);
+        this.sampleClient = new MqttClient(broker, clientId, persistence);
 
         // Create a Paho MQTT client.
         try {
@@ -35,15 +32,16 @@ public class MQTT implements MqttCallback {
             connOpts.setCleanSession(true);
             connOpts.setKeepAliveInterval(180);
 
+            // 사설 인증서 등록
             SSLSocketFactory socketFactory = getSocketFactory(caFilePath);
             connOpts.setSocketFactory(socketFactory);
 
-            System.out.println("starting connect the server...");
+            // 연결 시도
             sampleClient.connect(connOpts);
-
             Thread.sleep(1000);
-            sampleClient.subscribe("test", 0);
             System.out.println("Broker: " + broker + " Connected");
+
+            sampleClient.subscribe(topic, 0);
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
