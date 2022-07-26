@@ -8,25 +8,27 @@ public class Main {
             return;
         }
 
+        // 유저 소스키
+        final String userSourceKey = args[0];
+
         // 로그 설정
         String confPath = "conf";
         PropertyConfigurator.configure(confPath + "/mqtt.log4j.properties");
         Registry registry = new Registry(confPath);
 
-        final String userSourceKey = args[0];
-
+        // mqtt 토픽명 조회
         MariaDB db = new MariaDB(
             registry.dbInfo._url,
             registry.dbInfo._id,
             registry.dbInfo._pw
         );
-
         String topicName = db.getMqttTopic(userSourceKey);
         db.close();
 
+        // mqtt 클라이언트 시작
         MQTT mqtt = new MQTT(
-                registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
-                userSourceKey, topicName
+            registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
+            userSourceKey, topicName
         );
 
         Thread.sleep(Long.MAX_VALUE);
