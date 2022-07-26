@@ -1,3 +1,4 @@
+import db.MariaDB;
 import org.apache.log4j.PropertyConfigurator;
 
 public class Main {

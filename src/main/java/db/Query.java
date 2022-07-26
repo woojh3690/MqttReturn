@@ -1,3 +1,5 @@
+package db;
+
 public class Query {
     public final static String MQTT_TOPIC_COL = "mqtt_topic";
 
