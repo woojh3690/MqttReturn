@@ -1,3 +1,5 @@
+package mqtt;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -81,11 +83,6 @@ public class MQTT implements MqttCallback {
     }
 
     @Override
-    public void connectionLost(Throwable cause) {
-        System.out.println("Lost Connection : " + cause.getCause());
-    }
-
-    @Override
     public void messageArrived(String topic, MqttMessage message) {
         System.out.println("Message arrived. : " + new String(message.getPayload(), StandardCharsets.UTF_8));
     }
@@ -93,6 +90,11 @@ public class MQTT implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
         System.out.println("Message with " + token + " delivered.");
+    }
+
+    @Override
+    public void connectionLost(Throwable cause) {
+        System.out.println("Lost Connection : " + cause.getCause());
     }
 
     public void close() {
