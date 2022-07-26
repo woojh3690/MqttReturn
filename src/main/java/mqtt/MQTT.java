@@ -3,6 +3,7 @@ package mqtt;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import process.ProcessMsg;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -19,8 +20,10 @@ public class MQTT implements MqttCallback {
 
     private final MemoryPersistence persistence;
     private final MqttClient sampleClient;
+    private final ProcessMsg processMsg;
 
-    public MQTT(String ip, String port, String caFilePath, String clientId, String topic) throws Exception {
+    public MQTT(String ip, String port, String caFilePath, String clientId, String topic,
+                ProcessMsg processMsg) throws Exception {
         final String broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
         this.sampleClient = new MqttClient(broker, clientId, persistence);
@@ -52,6 +55,8 @@ public class MQTT implements MqttCallback {
             System.out.println("excep " + me);
             me.printStackTrace();
         }
+
+        this.processMsg = processMsg;
     }
 
     private static SSLSocketFactory getSocketFactory(final String caCrtFile) throws Exception {
@@ -76,7 +81,7 @@ public class MQTT implements MqttCallback {
         tmf.init(caKs);
 
         // finally, create SSL socket factory
-        SSLContext context = SSLContext.getInstance("TLSv1.3");
+        SSLContext context = SSLContext.getInstance("TLSv1.2");
         context.init(null, tmf.getTrustManagers(), null);
 
         return context.getSocketFactory();
@@ -84,7 +89,8 @@ public class MQTT implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
-        System.out.println("Message arrived. : " + new String(message.getPayload(), StandardCharsets.UTF_8));
+        String utf8msg = new String(message.getPayload(), StandardCharsets.UTF_8);
+        this.processMsg.sendResponse(utf8msg);
     }
 
     @Override

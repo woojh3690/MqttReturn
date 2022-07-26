@@ -1,11 +1,13 @@
 import db.MariaDB;
+import mqtt.MQTT;
 import org.apache.log4j.PropertyConfigurator;
+import process.ProcessMsg;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            System.out.println("arg 0 = user_id (pk)");
+            System.out.println("arg 0 = user_source_key (pk)");
             return;
         }
 
@@ -29,7 +31,8 @@ public class Main {
         // mqtt 클라이언트 시작
         MQTT mqtt = new MQTT(
             registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
-            userSourceKey, topicName
+            userSourceKey, topicName,
+            new ProcessMsg(registry.server_ip, registry.server_port, registry.jksPath)
         );
 
         Thread.sleep(Long.MAX_VALUE);
