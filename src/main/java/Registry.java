@@ -19,10 +19,10 @@ public class Registry {
     }
 
     public static class DBConnectionInfo {
-        public String _driver;
-        public String _url;
-        public String _id;
-        public String _pw;
+        public String driver;
+        public String url;
+        public String id;
+        public String pw;
     }
 
     private void loadConfig(String configPath) throws IOException {
@@ -55,13 +55,13 @@ public class Registry {
 
                 ///////////////// MariaDB
                 else if (key.equals("dbdriver")) {
-                    dbInfo._driver = value;
+                    dbInfo.driver = value;
                 } else if (key.equals("dburl")) {
-                    dbInfo._url = value;
+                    dbInfo.url = value;
                 } else if (key.equals("dbid")) {
-                    dbInfo._id = value;
+                    dbInfo.id = value;
                 } else if (key.equals("dbpw")) {
-                    dbInfo._pw = value;
+                    dbInfo.pw = value;
                 }
 
                 ///////////////// hdfs

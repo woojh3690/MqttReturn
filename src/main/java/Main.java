@@ -21,9 +21,9 @@ public class Main {
 
         // mqtt 토픽명 조회
         MariaDB db = new MariaDB(
-            registry.dbInfo._url,
-            registry.dbInfo._id,
-            registry.dbInfo._pw
+            registry.dbInfo.url,
+            registry.dbInfo.id,
+            registry.dbInfo.pw
         );
         String topicName = db.getMqttTopic(userSourceKey);
         db.close();
