@@ -52,6 +52,7 @@ public class MQTT implements MqttCallback {
             this.logManager.writeLog("Broker: " + broker + " Connected", LOG_TYPE.INFO, "MQTT");
 
             sampleClient.subscribe(topic, 0);
+            this.logManager.writeLog("Subscribe topic: " + topic, LOG_TYPE.INFO, "MQTT");
         } catch (MqttException me) {
             String errMsgForm = "reason : %s \nmsg : %s \nloc : %s \ncause : %s \n excep : %s";
             String errMsg = String.format(errMsgForm,
@@ -99,7 +100,13 @@ public class MQTT implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) {
         String utf8msg = new String(message.getPayload(), StandardCharsets.UTF_8);
         logManager.writeLog("Arrived msg : " + utf8msg, LOG_TYPE.INFO, "MQTT");
-        processMsg.sendResponse(utf8msg);
+        try {
+            processMsg.sendResponse(utf8msg);
+        } catch (Exception e) {
+            logManager.writeLog(e.getMessage(), LOG_TYPE.ERROR, "MQTT");
+            e.printStackTrace();
+        }
+
     }
 
     @Override

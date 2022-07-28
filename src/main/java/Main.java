@@ -22,7 +22,7 @@ public class Main {
         LogManager logManager = new LogManager(confPath);
         Registry registry = new Registry(confPath);
 
-        logManager.writeLog("Read config success.", LOG_TYPE.INFO, "Main");
+        logManager.writeLog("Success read config.", LOG_TYPE.INFO, "Main");
 
         // mqtt 토픽명 조회
         MariaDB db = new MariaDB(
@@ -33,7 +33,7 @@ public class Main {
         String topicName = db.getMqttTopic(userSourceKey);
         db.close();
 
-        logManager.writeLog("Mqtt-topic : " + topicName, LogManager.LOG_TYPE.INFO, "Main");
+        logManager.writeLog("Success get topic: " + topicName, LogManager.LOG_TYPE.INFO, "Main");
 
         // mqtt 클라이언트 시작
         MQTT mqtt = new MQTT(
