@@ -4,6 +4,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import process.ProcessMsg;
+import util.LogManager;
+import util.LogManager.LOG_TYPE;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -21,12 +23,15 @@ public class MQTT implements MqttCallback {
     private final MemoryPersistence persistence;
     private final MqttClient sampleClient;
     private final ProcessMsg processMsg;
+    private final LogManager logManager;
 
     public MQTT(String ip, String port, String caFilePath, String clientId, String topic,
+                LogManager logManager,
                 ProcessMsg processMsg) throws Exception {
         final String broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
         this.sampleClient = new MqttClient(broker, clientId, persistence);
+        this.logManager = logManager;
 
         // Create a Paho MQTT client.
         try {
@@ -44,15 +49,18 @@ public class MQTT implements MqttCallback {
             // 연결 시도
             sampleClient.connect(connOpts);
             Thread.sleep(1000);
-            System.out.println("Broker: " + broker + " Connected");
+            this.logManager.writeLog("Broker: " + broker + " Connected", LOG_TYPE.INFO, "MQTT");
 
             sampleClient.subscribe(topic, 0);
         } catch (MqttException me) {
-            System.out.println("reason " + me.getReasonCode());
-            System.out.println("msg " + me.getMessage());
-            System.out.println("loc " + me.getLocalizedMessage());
-            System.out.println("cause " + me.getCause());
-            System.out.println("excep " + me);
+            String errMsgForm = "reason : %s \nmsg : %s \nloc : %s \ncause : %s \n excep : %s";
+            String errMsg = String.format(errMsgForm,
+                    me.getReasonCode(),
+                    me.getMessage(),
+                    me.getLocalizedMessage(),
+                    me.getCause(),
+                    me);
+            this.logManager.writeLog(errMsg, LOG_TYPE.ERROR, "MQTT");
             me.printStackTrace();
         }
 
@@ -90,17 +98,18 @@ public class MQTT implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage message) {
         String utf8msg = new String(message.getPayload(), StandardCharsets.UTF_8);
-        this.processMsg.sendResponse(utf8msg);
+        logManager.writeLog("Arrived msg : " + utf8msg, LOG_TYPE.INFO, "MQTT");
+        processMsg.sendResponse(utf8msg);
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        System.out.println("Message with " + token + " delivered.");
+        logManager.writeLog("Message with " + token + " delivered.", LOG_TYPE.INFO, "MQTT");
     }
 
     @Override
     public void connectionLost(Throwable cause) {
-        System.out.println("Lost Connection : " + cause.getCause());
+        logManager.writeLog("Lost Connection : " + cause.getCause(), LOG_TYPE.WARN, "MQTT");
     }
 
     public void close() {

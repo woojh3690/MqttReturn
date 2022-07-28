@@ -1,14 +1,18 @@
 package process;
 
 import com.google.gson.Gson;
+import util.LogManager;
+import util.LogManager.LOG_TYPE;
 
 public class ProcessMsg {
     final Gson gson;
     final KafkaProducerEZ kafka;
+    final LogManager logManager;
 
-    public ProcessMsg(String kafkaIp, int kafkaPort, String jksPath) {
-        gson = new Gson();
-        kafka = new KafkaProducerEZ(kafkaIp, kafkaPort, jksPath);
+    public ProcessMsg(String kafkaIp, int kafkaPort, String jksPath, LogManager logManager) {
+        this.gson = new Gson();
+        this.kafka = new KafkaProducerEZ(kafkaIp, kafkaPort, jksPath);
+        this.logManager = logManager;
     }
 
     public void sendResponse(String message) {
@@ -17,5 +21,6 @@ public class ProcessMsg {
         dstDeviceJsonFormat.msg.get(0).msg_header.msg_err_code = "1";
         String responseMsg = gson.toJson(dstDeviceJsonFormat);
         kafka.send("molit", responseMsg);
+        logManager.writeLog("Complete send response msg.", LOG_TYPE.INFO, "ProcessMsg");
     }
 }

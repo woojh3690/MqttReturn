@@ -1,7 +1,10 @@
 import db.MariaDB;
 import mqtt.MQTT;
-import org.apache.log4j.PropertyConfigurator;
 import process.ProcessMsg;
+import util.LogManager;
+import util.LogManager.LOG_TYPE;
+import util.Registry;
+
 
 public class Main {
 
@@ -14,10 +17,12 @@ public class Main {
         // 유저 소스키
         final String userSourceKey = args[0];
 
-        // 로그 설정
+        // 로그 및 환경 설정 초기화
         String confPath = "conf";
-        PropertyConfigurator.configure(confPath + "/mqtt.log4j.properties");
+        LogManager logManager = new LogManager(confPath);
         Registry registry = new Registry(confPath);
+
+        logManager.writeLog("Read config success.", LOG_TYPE.INFO, "Main");
 
         // mqtt 토픽명 조회
         MariaDB db = new MariaDB(
@@ -28,11 +33,14 @@ public class Main {
         String topicName = db.getMqttTopic(userSourceKey);
         db.close();
 
+        logManager.writeLog("Mqtt-topic : " + topicName, LogManager.LOG_TYPE.INFO, "Main");
+
         // mqtt 클라이언트 시작
         MQTT mqtt = new MQTT(
             registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
             userSourceKey, topicName,
-            new ProcessMsg(registry.server_ip, registry.server_port, registry.jksPath)
+            logManager,
+            new ProcessMsg(registry.server_ip, registry.server_port, registry.jksPath, logManager)
         );
 
         Thread.sleep(Long.MAX_VALUE);
