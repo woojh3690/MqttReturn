@@ -1,7 +1,7 @@
 package kr.co.iwaz;
 
 import kr.co.iwaz.db.MariaDB;
-import kr.co.iwaz.mqtt.MQTT;
+import kr.co.iwaz.mqtt.MQTTManager;
 import kr.co.iwaz.process.ProcessMsg;
 import kr.co.iwaz.util.LogManager;
 import kr.co.iwaz.util.LogManager.LOG_TYPE;
@@ -38,7 +38,7 @@ public class Main {
         logManager.writeLog("Success get topic: " + topicName, LogManager.LOG_TYPE.INFO, "Main");
 
         // mqtt 클라이언트 시작
-        MQTT mqtt = new MQTT(
+        MQTTManager mqtt = new MQTTManager(
             registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
             userSourceKey, topicName,
             logManager,

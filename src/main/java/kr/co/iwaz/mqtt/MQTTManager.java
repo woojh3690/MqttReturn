@@ -18,16 +18,16 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class MQTT implements MqttCallback {
+public class MQTTManager implements MqttCallback {
 
     private final MemoryPersistence persistence;
     private final MqttClient sampleClient;
     private final ProcessMsg processMsg;
     private final LogManager logManager;
 
-    public MQTT(String ip, String port, String caFilePath, String clientId, String topic,
-                LogManager logManager,
-                ProcessMsg processMsg) throws Exception {
+    public MQTTManager(String ip, String port, String caFilePath, String clientId, String topic,
+                       LogManager logManager,
+                       ProcessMsg processMsg) throws Exception {
         final String broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
         this.sampleClient = new MqttClient(broker, clientId, persistence);
