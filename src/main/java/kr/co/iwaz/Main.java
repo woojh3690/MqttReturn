@@ -7,7 +7,6 @@ import kr.co.iwaz.util.LogManager;
 import kr.co.iwaz.util.LogManager.LOG_TYPE;
 import kr.co.iwaz.util.Registry;
 
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -28,9 +27,9 @@ public class Main {
 
         // mqtt 토픽명 조회
         MariaDB db = new MariaDB(
-            registry.dbInfo.url,
-            registry.dbInfo.id,
-            registry.dbInfo.pw
+                registry.dbInfo.url,
+                registry.dbInfo.id,
+                registry.dbInfo.pw
         );
         String topicName = db.getMqttTopic(userSourceKey);
         db.close();
@@ -39,10 +38,10 @@ public class Main {
 
         // mqtt 클라이언트 시작
         MQTTManager mqtt = new MQTTManager(
-            registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
-            userSourceKey, topicName,
-            logManager,
-            new ProcessMsg(registry.server_ip, registry.server_port, registry.jksPath, logManager)
+                registry.mqttIP, registry.mqttPort, registry.jksPath + "/ca.pem",
+                userSourceKey, topicName,
+                logManager,
+                new ProcessMsg(registry.server_ip, registry.server_port, registry.jksPath, logManager)
         );
 
         Thread.sleep(Long.MAX_VALUE);

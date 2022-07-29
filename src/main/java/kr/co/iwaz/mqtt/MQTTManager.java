@@ -106,7 +106,6 @@ public class MQTTManager implements MqttCallback {
             logManager.writeLog(e.getMessage(), LOG_TYPE.ERROR, "MQTT");
             e.printStackTrace();
         }
-
     }
 
     @Override
