@@ -142,10 +142,11 @@ public class MQTTManager implements MqttCallbackExtended {
 
     public void close() {
         try {
+            this.client.disconnect();
             this.client.close();
             this.persistence.close();
         } catch (MqttException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 }
