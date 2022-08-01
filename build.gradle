@@ -3,10 +3,23 @@ plugins {
 }
 
 group 'kr.co.iwaz'
-version '1.0-SNAPSHOT'
+version '1.1'
 
 repositories {
     mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'kr.co.iwaz.Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
 
 compileJava.options.encoding = 'UTF-8'
