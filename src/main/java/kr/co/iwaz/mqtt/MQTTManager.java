@@ -40,6 +40,7 @@ public class MQTTManager implements MqttCallback {
             // Set the MQTT connection parameters.
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
+            connOpts.setAutomaticReconnect(true);
             connOpts.setKeepAliveInterval(180);
 
             // 사설 인증서 등록
