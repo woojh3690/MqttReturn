@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 public class MQTTManager implements MqttCallbackExtended {
 
     private final MemoryPersistence persistence;
-    private final MqttClient sampleClient;
+    private final MqttClient client;
     private final ProcessMsg processMsg;
     private final LogManager logManager;
 
@@ -33,13 +33,13 @@ public class MQTTManager implements MqttCallbackExtended {
                        ProcessMsg processMsg) throws Exception {
         this.broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
-        this.sampleClient = new MqttClient(broker, clientId, persistence);
+        this.client = new MqttClient(broker, clientId, persistence);
         this.logManager = logManager;
         this.topic = topic;
 
         // Create a Paho MQTT client.
         try {
-            sampleClient.setCallback(this);
+            client.setCallback(this);
 
             // Set the MQTT connection parameters.
             MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -52,7 +52,7 @@ public class MQTTManager implements MqttCallbackExtended {
             connOpts.setSocketFactory(socketFactory);
 
             // 연결 시도
-            sampleClient.connect(connOpts);
+            client.connect(connOpts);
         } catch (MqttException e) {
             printException(e);
         }
@@ -93,7 +93,7 @@ public class MQTTManager implements MqttCallbackExtended {
         logManager.writeLog("Broker: " + broker + " Connected", LOG_TYPE.INFO, "MQTT");
 
         try{
-            sampleClient.subscribe(topic, 0);
+            client.subscribe(topic, 0);
             logManager.writeLog("Subscribe topic: " + topic, LOG_TYPE.INFO, "MQTT");
         } catch (MqttException e) {
             printException(e);
@@ -141,7 +141,7 @@ public class MQTTManager implements MqttCallbackExtended {
 
     public void close() {
         try {
-            this.sampleClient.close();
+            this.client.close();
             this.persistence.close();
         } catch (MqttException e) {
             throw new RuntimeException(e);
