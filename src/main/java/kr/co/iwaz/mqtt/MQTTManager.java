@@ -18,20 +18,24 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class MQTTManager implements MqttCallback {
+public class MQTTManager implements MqttCallbackExtended {
 
     private final MemoryPersistence persistence;
     private final MqttClient sampleClient;
     private final ProcessMsg processMsg;
     private final LogManager logManager;
 
+    private final String broker;            // 브로커 커넥션 경로
+    private final String topic;             // 토픽명
+
     public MQTTManager(String ip, String port, String caFilePath, String clientId, String topic,
                        LogManager logManager,
                        ProcessMsg processMsg) throws Exception {
-        final String broker = String.format("ssl://%s:%s", ip, port);
+        this.broker = String.format("ssl://%s:%s", ip, port);
         this.persistence = new MemoryPersistence();
         this.sampleClient = new MqttClient(broker, clientId, persistence);
         this.logManager = logManager;
+        this.topic = topic;
 
         // Create a Paho MQTT client.
         try {
@@ -49,21 +53,8 @@ public class MQTTManager implements MqttCallback {
 
             // 연결 시도
             sampleClient.connect(connOpts);
-            Thread.sleep(1000);
-            this.logManager.writeLog("Broker: " + broker + " Connected", LOG_TYPE.INFO, "MQTT");
-
-            sampleClient.subscribe(topic, 0);
-            this.logManager.writeLog("Subscribe topic: " + topic, LOG_TYPE.INFO, "MQTT");
-        } catch (MqttException me) {
-            String errMsgForm = "reason : %s \nmsg : %s \nloc : %s \ncause : %s \n excep : %s";
-            String errMsg = String.format(errMsgForm,
-                    me.getReasonCode(),
-                    me.getMessage(),
-                    me.getLocalizedMessage(),
-                    me.getCause(),
-                    me);
-            this.logManager.writeLog(errMsg, LOG_TYPE.ERROR, "MQTT");
-            me.printStackTrace();
+        } catch (MqttException e) {
+            printException(e);
         }
 
         this.processMsg = processMsg;
@@ -98,6 +89,18 @@ public class MQTTManager implements MqttCallback {
     }
 
     @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        logManager.writeLog("Broker: " + broker + " Connected", LOG_TYPE.INFO, "MQTT");
+
+        try{
+            sampleClient.subscribe(topic, 0);
+            logManager.writeLog("Subscribe topic: " + topic, LOG_TYPE.INFO, "MQTT");
+        } catch (MqttException e) {
+            printException(e);
+        }
+    }
+
+    @Override
     public void messageArrived(String topic, MqttMessage message) {
         String utf8msg = new String(message.getPayload(), StandardCharsets.UTF_8);
         logManager.writeLog("Arrived msg : " + utf8msg, LOG_TYPE.INFO, "MQTT");
@@ -117,6 +120,23 @@ public class MQTTManager implements MqttCallback {
     @Override
     public void connectionLost(Throwable cause) {
         logManager.writeLog("Lost Connection : " + cause.getCause(), LOG_TYPE.WARN, "MQTT");
+        logManager.writeLog("Lost Connection : " + cause.getMessage(), LOG_TYPE.WARN, "MQTT");
+    }
+
+    /**
+     * MQTT Exception 로그로 기록한다.
+     * @param me    로그로 기록할 MQTT 예외
+     */
+    private void printException(MqttException me) {
+        String errMsgForm = "reason : %s \nmsg : %s \nloc : %s \ncause : %s \n excep : %s";
+        String errMsg = String.format(errMsgForm,
+                me.getReasonCode(),
+                me.getMessage(),
+                me.getLocalizedMessage(),
+                me.getCause(),
+                me);
+        logManager.writeLog(errMsg, LOG_TYPE.ERROR, "MQTT");
+        me.printStackTrace();
     }
 
     public void close() {
