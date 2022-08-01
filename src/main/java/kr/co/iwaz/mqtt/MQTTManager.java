@@ -55,6 +55,7 @@ public class MQTTManager implements MqttCallbackExtended {
             client.connect(connOpts);
         } catch (MqttException e) {
             printException(e);
+            throw e;
         }
 
         this.processMsg = processMsg;
